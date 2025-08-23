@@ -1,14 +1,35 @@
-const { Client, GatewayIntentBits } = require('discord.js');
-const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
-  ]
+// === Serveur HTTP pour Render ===
+const express = require('express');
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.get('/', (req, res) => {
+  res.send('Bot en ligne !');
 });
 
-// 300 punchlines de clash
+app.listen(PORT, () => {
+  console.log(`Serveur HTTP actif sur le port ${PORT}`);
+});
+
+// === Discord Bot ===
+const { Client, GatewayIntentBits } = require('discord.js');
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
+
+// Remplace TON_TOKEN_ICI par ton token Discord
+const TOKEN = process.env.TOKEN || 'TON_TOKEN_ICI';
+
+// Liste complète de tes punchlines (ici juste un extrait, ajoute toutes tes 500+ punchlines)
 const punchlines = [
+"T’es tellement nul que même ton ombre te fuit.",
+"T’es tellement froid que même un glaçon te trouve glacial.",
+"T’es tellement lent que les tortues t’ont doublé en marchant.",
+"T’es tellement moche que ton miroir te demande pardon.",
+"T’es tellement idiot que Google refuse de répondre à tes questions.",
+"T’es tellement ridicule que les clowns te prennent comme exemple.",
+"T’es tellement faible que même les feuilles te repoussent.",
+"T’es tellement maladroit que même les murs t’évitent.",
+"T’es tellement paresseux que ton lit t’a envoyé un message de plainte.",
+"T’es tellement con que Siri te dit 'non'.",
 "T’es tellement nul que même ton ombre te fuit.",
 "T’es tellement froid que même un glaçon te trouve glacial.",
 "T’es tellement lent que les tortues t’ont doublé en marchant.",
@@ -100,37 +121,23 @@ const punchlines = [
 "T’es tellement con que ton réveil te joue des tours.",
 "T’es tellement nul que même ton Wi-Fi te bloque.",
 "T’es tellement froid que les glaciers te trouvent tiède."
+  // … ajoute ici toutes les autres punchlines (500+)
 ];
-// Commande punch
-client.on('ready', () => {
-  console.log(`✅ Connecté en tant que ${client.user.tag}`);
+
+client.once('ready', () => {
+  console.log(`Connecté en tant que ${client.user.tag}`);
 });
 
 client.on('messageCreate', message => {
-  if(message.content.startsWith('!punch')) {
-    const mention = message.mentions.users.first();
-    if(!mention) return message.reply("Tu dois mentionner quelqu'un !");
-
-    const random = Math.floor(Math.random() * punchlines.length);
-    message.channel.send(`${mention} ${punchlines[random]}`);
+  if (!message.guild) return; // ignore les messages privés
+  if (message.content.startsWith('!punch')) {
+    const user = message.mentions.users.first();
+    if (!user) {
+      return message.channel.send("Tu dois mentionner quelqu'un !");
+    }
+    const randomPunch = punchlines[Math.floor(Math.random() * punchlines.length)];
+    message.channel.send(`${user}, ${randomPunch}`);
   }
 });
 
-client.login(process.env.TOKEN);
-// Tout ton code de bot ici, avec client.on('messageCreate') etc...
-
-// ---------------------
-// Serveur HTTP pour Render
-const express = require('express');
-const app = express();
-
-// Endpoint pingable
-app.get('/', (req, res) => {
-  res.send('Bot en ligne !');
-});
-
-// Démarrer le serveur sur le port fourni par Render
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Serveur pingable démarré sur le port ${PORT}`);
-});
+client.login(TOKEN);
