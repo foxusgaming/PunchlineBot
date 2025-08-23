@@ -117,3 +117,20 @@ client.on('messageCreate', message => {
 });
 
 client.login(process.env.TOKEN);
+// Tout ton code de bot ici, avec client.on('messageCreate') etc...
+
+// ---------------------
+// Serveur HTTP pour Render
+const express = require('express');
+const app = express();
+
+// Endpoint pingable
+app.get('/', (req, res) => {
+  res.send('Bot en ligne !');
+});
+
+// Démarrer le serveur sur le port fourni par Render
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Serveur pingable démarré sur le port ${PORT}`);
+});
